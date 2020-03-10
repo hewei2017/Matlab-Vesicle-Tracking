@@ -1,7 +1,7 @@
 function tracks = track_addbri(xys,maxdisp,iz)
 % 
 % NAME:
-%               vesiclepreconf
+%               track_addbri
 % PURPOSE:
 %               Connnecting the trajecteries following the xy-coordinates
 %               information in image arrays         
@@ -19,12 +19,10 @@ function tracks = track_addbri(xys,maxdisp,iz)
 %               iz: processing end image number for the purpose of deleting data from the image arrays in which the Cell moved.  
 %
 % OUTPUTS:
-%               tracks:    resulted trajectery in a format of [ x y ids framenumber]
+%           tracks: a N x 7 array containing [x-coordinates, y-coordinates, bright,Eccentricity,Overlap, track id, frame number]
 %    
 % NOTES:
-%               This code is adpated from orignial code from Dr. David G.
-%               Grier with some increased information for individual
-%               vesicles; 
+%               This code is adpated from orignial code from Crocker, J. C. et al. Two-Point Microrheology of Inhomogeneous          %               Soft Materials. Physical Review Letters 85, 888-891, doi:10.1103/PhysRevLett.85.888 (2000).
 
 dd = length(xys(1,:));
     memory_b    =   20;

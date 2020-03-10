@@ -24,7 +24,9 @@ function [xys,PreProcessSequence] = vesiclepreconf(fname,init,final,testframeno)
 %               xys:    x,y coordinates in a [ x y ids framenumber]
 %               PreProcessSequence: image sequence after denoise
 % NOTES:
-% Performs a bandpass by convolving with an appropriate kernel.  You can
+%               [BW,MASKEDIMAGE] = segmentImage(X) segments image X using auto-generated
+%               code from the imageSegmenter App. The final segmentation is returned in
+%               BW, and a masked image is returned in MASKEDIMAGE.
 
 
 pause on

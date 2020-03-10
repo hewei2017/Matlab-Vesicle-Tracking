@@ -32,7 +32,7 @@ function [xys,PreProcessSequence] = vesiclepreconf(fname,init,final,testframeno)
 pause on
     nimg = final-init+1;
     
-    [thd1all, thd2all] = thdFP3(fname,init,final) ;
+    [thd1all, thd2all] = thdFP(fname,init,final) ;
     Iori = imread(fname, testframeno);
     h = fspecial('average', [13 13]);
     I2= imfilter(Iori, h);

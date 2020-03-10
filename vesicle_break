@@ -1,0 +1,36 @@
+function res1=vesicle_break(id, res, frameno)
+% 
+% NAME:
+%               vesicle_add
+% PURPOSE:
+%               Implements breaking an existing specific trajectory 
+% 
+% CATEGORY:
+%               Image Processing
+%
+% CALLING SEQUENCE:
+%               res1=vesicle_break(id, res, frameno)
+%
+% INPUTS:
+%               id:  the id of the trajectory to break into two fragments
+%               res:  the res file containing all trajectory
+%               frameno:  the time corresponding frame number to be break
+%
+% OUTPUTS:
+%               res1:  resulted res1 file after the trajectory is broken
+%               into two fragments
+%      
+frame = res(:,4)==id;
+b=find(frame==1);
+x=res(b,1);y=res(b,2); timestep = res(b,3);
+N = length(x);
+%find the row number of the vesicle 
+idbreak = find(timestep==frameno);
+row_no = b(1+idbreak-1);
+Nnew = N-idbreak;
+%change the rows later than row number 
+%for timesteps
+res1 = res;
+res1(row_no: row_no+Nnew-1,3) = res1(row_no: row_no+Nnew-1,3)-res1(row_no,3)+1;
+%for track ids
+res1(row_no:end,4)= res1(row_no:end,4)+1;

@@ -1,0 +1,41 @@
+function res1=vesicle_add(id, res,xnew, ynew, tnew)
+% 
+% NAME:
+%               vesicle_add
+% PURPOSE:
+%               Implements adding a location to a specific trajectory  id 
+% 
+% CATEGORY:
+%               Image Processing
+%
+% CALLING SEQUENCE:
+%               res1=vesicle_add(id, res,xnew, ynew, tnew)
+%
+% INPUTS:
+%               id:  the id of the trajectory to which the new location to be added
+%               res:  the res file to which the new location to be added
+%               final:  processing end image number. 
+%               tnew:  the time corresponding frame number to be added into res 
+%
+% OUTPUTS:
+%               res1:  resulted res1 file from res with the new location
+%               added to tnew step of the trajectory id in res. 
+%      
+
+b=find(frame==1);
+x=res(b,1);y=res(b,2); timestep = res(b,3);
+vesicelnew = [xnew, ynew, tnew, id];
+%find the row number of the vesicel new
+if tnew<timestep(1)
+    row_no = b(1);
+else
+    row_no = b(end)+1;
+end
+res1 = res;
+res1(1:row_no-1,:) = res1(1:row_no-1,:);
+tp =res1(row_no:end,:);
+res1(row_no,:)=vesicelnew;
+res1(row_no+1:end+1,:) =tp;
+
+
+   

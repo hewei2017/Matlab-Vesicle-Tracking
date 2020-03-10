@@ -1,0 +1,52 @@
+function posp1 = vesicle_display(xys,imagef, frameno)
+% 
+% NAME:
+%               vesicle_display
+% PURPOSE:
+%               Implements display the vesicles and their coordinates in a single frame 
+% 
+% CATEGORY:
+%               Image Processing
+%
+% CALLING SEQUENCE:
+%               posp1 = vesicle_display(xys,imagef, frameno)
+%
+% INPUTS:
+%               xys:  the xy-coordinates of vesicles in the whole image seuqence
+%               imagef:  the whole image seuqence
+%               frameno: the number of the image whose vesicle locations to display. 
+%
+% OUTPUTS:
+%               posp1:  resulted res1 file from res with the new location
+%               
+% NOTE:         this function is to identify the missed vesicles in a trajectory      
+
+I =  imagef (:,:,frameno);
+
+indtag=diff(xys(:,6)); %tag the last frame of each filament
+indtag = [1; indtag];
+numbers=find(indtag); 
+vesiclelen = diff(numbers);
+vesiclelen=[vesiclelen;size(indtag,1)-numbers(end)+1];
+ncols=length(numbers); % number of frames 
+nrows=max(vesiclelen);  % maximam vesicle numbers
+
+x=zeros(nrows,ncols);
+y=x;
+c=['w','g','r','c','m','y','b'];
+
+i=frameno;
+x(1:vesiclelen(i),i)=xyzs(numbers(i):(numbers(i)+vesiclelen(i)-1),1);
+y(1:vesiclelen(i),i)=xyzs(numbers(i):(numbers(i)+vesiclelen(i)-1),2);  
+figure, imfitshow(I); hold on;
+xpos = xyzs(numbers(i):(numbers(i)+vesiclelen(i)-1),1);
+ypos = xyzs(numbers(i):(numbers(i)+vesiclelen(i)-1),2); 
+
+for i=1:length(xpos)
+    scatter(xpos(i),ypos(i),20,c(mod(i,7)+1));
+    text(xpos(i)+0.5,ypos(i)+0.5,num2str(xpos(i)),'color',c(mod(i,7)+1),'fontsize',11);
+    hold on
+end
+posp=[xpos,ypos];
+[~,idx] = sort(posp(:,1));
+posp1=posp(idx,:);

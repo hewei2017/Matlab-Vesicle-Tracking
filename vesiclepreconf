@@ -1,0 +1,66 @@
+function [xys,PreProcessSequence] = vesiclepreconf(fname,init,final,testframeno)
+% 
+% NAME:
+%               vesiclepreconf
+% PURPOSE:
+%               Implements a denosie process to the vesicles obtained from
+%               the microscopes, and obtained their xy-coordinates from
+%               fitting  the center of mass from their point spread
+%               function that fitted to a 2D Guassian shape. 
+% 
+% CATEGORY:
+%               Image Processing
+%
+% CALLING SEQUENCE:
+%               [xys,PreProcessSequence] = vesiclepreconf2(fname,init,final,testframeno)
+%
+% INPUTS:
+%               fname:  The two-dimensional raw image array
+%               init:   processing start image number.
+%               final:  processing end image number. 
+%               testframeno:  test image number. 
+%
+% OUTPUTS:
+%               xys:    x,y coordinates in a [ x y ids framenumber]
+%               PreProcessSequence: image sequence after denoise
+% NOTES:
+% Performs a bandpass by convolving with an appropriate kernel.  You can
+
+
+pause on
+    nimg = final-init+1;
+    
+    [thd1all, thd2all] = thdFP3(fname,init,final) ;
+    Iori = imread(fname, testframeno);
+    h = fspecial('average', [13 13]);
+    I2= imfilter(Iori, h);
+    I3=bpass(I2,3,13,0);
+    thd1=thd1all(testframeno);thd2=thd2all(testframeno);
+    I3(I3<thd1)=0;
+    filter=bpass(I3,3,13,0); 
+    filter(filter<thd2)=0;
+    [BW,maskedImage] = segmentImage_cilia(filter);
+    %%%%%%%%%%%%%%%%%%
+    thr=0;dia=11;diac=13;%!!!parameter to be checked in each processing 
+    pk=pkfnd(maskedImage,thr,dia);   
+    pk1=cntrdellipse(maskedImage,pk,diac);       
+    xpos=pk1(:,1); ypos=pk1(:,2);
+    figure, imfitshow(maskedImage); hold on;
+    plot(xpos,ypos,'ro'); hold off;
+pause;
+%%%%%%%%%%%%%%%%%
+PreProcessSequence = zeros([size(Iori) nimg],class(Iori));
+     
+for k = init:nimg+init-1
+    I = imread(fname,k);
+    I2= imfilter(I, h);
+    I3=bpass(I2,3,13,0);
+    thd1=thd1all(k);thd2=thd2all(k);
+    I3(I3<thd1)=0;
+    filter=bpass(I3,3,13,0); 
+    filter(filter<thd2)=0;
+    [BW,maskedImage] = segmentImage_cilia(filter);
+    PreProcessSequence(:,:,k)=maskedImage; 
+end
+    pause off
+xys=pps2pos(PreProcessSequence,11,13);

@@ -1,0 +1,87 @@
+%this function is to pretreat the fluorescent protein vesicle tracking
+%videos to get the threshold through interpolation
+function [thd1all, thd2all] = thdFP(fname, init,final) 
+% 
+% NAME:
+%               thdFP
+% PURPOSE:
+%               to obtained the threshold for vesicle location caculation
+%               by adjusting the photobleaching 
+% 
+% CATEGORY:
+%               Image Processing
+%
+% CALLING SEQUENCE:
+%               [thd1all, thd2all] = thdFP(fname, init,final)
+
+% INPUTS:
+%               fname:  The two-dimensional raw image array
+%               init:   processing start image number.
+%               final:  processing end image number. 
+%
+% OUTPUTS:
+%               thd1all: threshold of the fluorescence value for all image
+%               arrays after processing with the first bandpass filter
+%               thd2all: threshold of the fluorescence value for all image
+%               arrays after processing with the second bandpass filter
+% NOTES:
+%               vesicle size are typiclly seted to 13 pixels in this
+%               prosessing, need to be checked everytime in individual
+%               cells
+%               
+h = fspecial('average', [13 13]);
+Istart = imread(fname,2);
+Istart1 = imfilter(Istart, h);
+Istart2 = bpass(Istart1,3,13,0);imtool(Istart2); 
+thd1=input('Please input the substraction number:');
+nimg = final-init+1;
+
+backesti1 = []; 
+backestline1 = [];
+for k = init:nimg+init-1     
+    I = imread(fname, k); 
+    I3 = bpass(I,3,13,0);
+    k_inten = mean(I3,2);
+    backesti1(:,k) = k_inten;
+    backestline1(k) = mean(k_inten);
+end
+timelap = 1:1:nimg;
+semilogy(timelap, backestline1, 'o');
+ylabel('Average Intensity','FontSize',14); xlabel('Frame Number','FontSize',14);
+modelFun =  @(p,x) p(1).*exp(-p(2).*x);
+startingVals = [6 0.007];
+coefEsts = nlinfit(timelap, backestline1, modelFun, startingVals);
+xgrid = linspace(0,nimg,nimg); %search for the note, there are 100 point in the range of 0 to 120
+line(xgrid, modelFun(coefEsts, xgrid), 'Color','r');
+modifier = modelFun(coefEsts, xgrid)./backestline1(1);
+thd1all = modifier.*thd1;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Istart2(Istart2<thd1)=0;
+Istart3 = bpass(Istart2,3,15,0);imtool(Istart3);
+thd2=input('Please input the substraction number:');
+
+backesti2 = []; %zeros(mi num_images);
+backestline2 = [];
+for j = init:nimg+init-1 
+    I = imread(fname, k); %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    I2= imfilter(I, h);
+   % [BW,maskedImage]= segmentImage3(I2);
+    %I3 = bpass(maskedImage,5,21,0); 
+    I3 = bpass(I2,3,13,0); 
+    thd1j = thd1all(j);
+    I3(I3<thd1j)=0;
+    I4 = bpass(I3,3,13,0);
+    j_inten2 = mean(I4,2);
+    backesti2(:,j) = j_inten2;
+    backestline2(j) = mean(j_inten2);
+end
+timelap = 1:1:nimg;
+figure, semilogy(timelap, backestline2, 'o');
+ylabel('Average Intensity','FontSize',14); xlabel('Frame Number','FontSize',14);
+modelFun2 =  @(q,x) q(1).*exp(-q(2).*x);
+startingVals2 = [6 0.007];
+coefEsts2 = nlinfit(timelap, backestline2, modelFun2, startingVals2);
+line(xgrid, modelFun(coefEsts2, xgrid), 'Color','r');
+modifier2 =modelFun2(coefEsts2, xgrid)./backestline2(1);
+thd2all = modifier2.*thd2;
+

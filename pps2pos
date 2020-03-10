@@ -1,0 +1,40 @@
+function pos=pps2pos(pps,dia,diac)
+% 
+% NAME:
+%               pps2pos
+% PURPOSE:
+%               Implements a denosie process to the vesicles obtained from
+%               the microscopes, and obtained their xy-coordinates from
+%               fitting  the center of mass from their point spread
+%               function that fitted to a 2D Guassian shape. 
+% 
+% CATEGORY:
+%               Image Processing
+%
+% CALLING SEQUENCE:
+%               pos=pps2pos(pps,dia,diac)
+%
+% INPUTS:
+%               pps:  PreProcessSequence, the denoiseed two-dimensional image array
+%               dia:  size of vesicles center to fit the x-y coordiantes
+%               diac: size of whole vesicles to fit the x-y coordiantes
+%
+% OUTPUTS:
+%               pos:    x,y coordinates in a [ x y ids framenumber]
+%               
+thr=0;  %!!!!!!!!!!!!!
+[m,n,len]=size(pps);
+
+pos=[];posi=[];
+%start=input('Please input the start image number:');
+start=1;
+
+for i=start:len    % previous 10 frames are not even time lapse
+    a=pps(:,:,i);
+    b=double(a);
+    pk=pkfnd(b,thr,dia);   %pixel level position
+    pk1=cntrdellipse(b,pk,diac);       %sub-pixel position
+    tt=i*ones(size(pk1,1),1);
+    posi=[pk1,tt];
+    pos=[pos;posi];
+end

@@ -1,0 +1,50 @@
+function res2 = sorttt(res)
+% 
+% NAME:
+%               sorttt
+% PURPOSE:
+%               sort the revised trajectory id after insert locations or
+%               break trajectory or exchange segments
+% 
+% CATEGORY:
+%               Image Processing
+%
+% CALLING SEQUENCE:
+%               res2 = sorttt(res)
+%
+% INPUTS:
+%               res:  the res file to adjust id numbers
+%
+% OUTPUTS:
+%               res2:  resulted res2 file from res after id adjusted 
+%      
+
+[~,idx] = sort(res(:,4));
+res1=res(idx,:);
+%then within the track itself
+k=res1(:,4);  
+k1=diff(k);    
+k1=[1;k1];    
+dk=find(k1);  %where new trajectories start 
+
+lk=diff(dk);
+lk=[lk;size(k,1)-dk(end)+1]; %every trajectory's length
+numtra = length(lk);
+
+res2=[];
+for i=1:numtra
+    resi= res1(dk(i):(dk(i)+lk(i)-1),:);
+    [~,idx1] = sort(resi(:,3));
+    resi1=resi(idx1,:);
+    tt= resi1(:,3);
+    st = circshift(tt,1);
+    st = tt(2:end) - st(2:end);
+    doubleind =  find(st==0, 1);
+    if ~isempty(doubleind)
+        idx2=[1;st>0];
+    resi2 = resi1(idx2>0,:);
+    res2=[res2;resi2];
+    else
+    res2=[res2;resi1];
+    end
+end

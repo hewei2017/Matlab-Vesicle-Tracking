@@ -1,0 +1,56 @@
+function res2=vesicle_fragex(id1, id2, res, frameno1, frameno2, exchange)
+% 
+% NAME:
+%               vesicle_fragex
+% PURPOSE:
+%               Implements exchange segments between two trajectories
+% 
+% CATEGORY:
+%               Image Processing
+%
+% CALLING SEQUENCE:
+%               res2=vesicle_fragex(id1, id2, res, frameno1, frameno2, exchange)
+%
+% INPUTS:
+%               id1:  the id of the track to provide segments
+%               id2:  the id of the track to receive segments
+%               res:  the res file contains all tracks
+%               frameno1: the start image number of segment of the provide track 
+%               frameno2: the end image number of segment of the provide track
+%               exchange: if this is set to 1, the segments are echange, if
+%               this is set to 0, the segments is added to the track id2
+%
+% OUTPUTS:
+%               res2:  resulted res2 from res with the exchange locations changed between the two trajectories.
+%      
+frag_length = frameno2 - frameno1+1;
+%find the row number of the vesicle id1
+frame = res(:,4)==id1;
+b=find(frame==1);
+x=res(b,1);y=res(b,2); timestep = res(b,3);
+idbreak = find(timestep==frameno1);
+if isempty(idbreak)
+    thd1=input('Please check the frame number:');
+    idbreak = find(timestep==thd1);
+end
+row_no1 = b(1+idbreak-1);
+%find the row number of the vesicle id2
+frame = res(:,4)==id2;
+b=find(frame==1);
+x=res(b,1);y=res(b,2); timestep = res(b,3);
+idbreak = find(timestep==frameno2);
+row_no2 = b(1+idbreak-1);
+
+%change the id numbers  
+res1 = res;
+%for case only add fragment of id1 to track id2
+res1(row_no1: row_no1+frag_length-1,4) = id2;
+%for case only exchange fragments between id1 and id2
+if exchange
+res1(row_no2: row_no2+frag_length-1,4) = id1;
+end
+
+res2 = sorttt(res1);
+
+
+   

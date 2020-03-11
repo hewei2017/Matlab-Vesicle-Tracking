@@ -1,0 +1,64 @@
+function trackshow_frame(res,fname,imageno)
+% 
+% NAME:
+%               trackshow_frame
+% PURPOSE:
+%               Produce tracks overlay on a single frame to check the
+%               tracks on a single frame
+% 
+% CATEGORY:
+%               Image Processing
+%
+% CALLING SEQUENCE:
+%               trackshow_frame(res,fname,imageno)
+%
+% INPUTS:
+%               res:  the res file to which the new location to be added
+%               fname:  the original image array with vesicles 
+%               imageno:the frame number to check the overlay tracks
+%
+  
+indtag=diff(res(:,4)); %tag the last frame of each filament
+indtag = [1; indtag];
+numbers=find(indtag); 
+tralen = diff(numbers);
+tralen=[tralen;size(indtag,1)-numbers(end)+1];
+ncols=length(numbers); % number of frames 
+nrows=max(tralen);  % maximam vesicle numbers
+x=zeros(nrows,ncols);
+y=x;
+%%%%%%%%%%%%%%%%%%supplimental matrix%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%framenos=lres(:,3);
+for i=1:ncols
+    frame = numbers(i):(numbers(i)+tralen(i)-1);
+    fastres=res(frame,:);
+       for j=1:tralen(i)
+           idf=fastres(j,3);
+           x(idf,i)=fastres(j,1);
+           y(idf,i)=fastres(j,2);
+       end
+end
+
+c=['b','g','r','c','m','y'];
+%%%%%%%%%%%%%%%%%%%plot the linear track%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%imageno=150; 
+    Iori = imread(fname, imageno);%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    h = fspecial('average', [13 13]);
+    I2= imfilter(Iori, h);
+    imshow(I2)
+    hold on;
+   
+   for trano=1:ncols  %a colomn j of x is plotted every time         
+            xreal= x(1:imageno,trano)~=0;yreal= y(1:imageno,trano)~=0;
+            xa=x(xreal,trano);ya=y(yreal,trano);
+            if ~isempty(xa)&&(x(imageno,trano)>0)  
+            plot(xa,ya,c(mod(trano,6)+1)); 
+            text(xa(1)+1,ya(1)+1,num2str(trano),'color',c(mod(trano,6)+1),'fontsize',11);
+            scatter(xa(1),ya(1),25,c(mod(trano,6)+1),'filled');
+            scatter(xa(end),ya(end),25,c(mod(trano,6)+1));
+            end
+            hold on;
+    end
+            axis equal;
+        title(strcat('Active tracks on the ',num2str(imageno),' frame'));
+    hold off
